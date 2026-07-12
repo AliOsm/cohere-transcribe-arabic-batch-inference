@@ -1,8 +1,4 @@
-# Optional modes and faster decoders. Install only what you use.
-
-# Enables `--audio-backend torchcodec`. Version 0.14.0 was validated with the
-# production PyTorch 2.11 environment.
-torchcodec>=0.14,<0.15
+# Optional modes. Install only what you use.
 
 # Enables `--vad auditok`. This can pull PyAudio/PortAudio build dependencies;
 # the default Silero mode does not need it.

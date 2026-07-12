@@ -23,9 +23,12 @@ librosa>=0.10.2.post1
 silero-vad==6.2.1
 onnxruntime>=1.16.1
 
-# Default word-level alignment. `unidecode` is required by the aligner's Arabic
-# romanization path but is not declared by all ctc-forced-aligner releases.
-ctc-forced-aligner==1.0.2
-unidecode
+# Default word-level alignment. Install the maintained implementation directly
+# from the exact Git revision evaluated with this bundle.
+ctc-forced-aligner @ git+https://github.com/MahmoudAshraf97/ctc-forced-aligner.git@c344f5bc900323aa434a7cb200b7c629d463bd02
+# Constrain two dependencies declared by that revision to the versions/ranges
+# validated by this bundle. Pip installs its other dependencies automatically.
+uroman==1.3.1.1
+torchcodec>=0.14,<0.15
 
 tqdm>=4.60

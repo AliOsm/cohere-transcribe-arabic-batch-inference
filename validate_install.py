@@ -8,6 +8,7 @@ import hashlib
 import importlib
 import importlib.metadata
 import importlib.util
+import json
 import math
 import shutil
 import subprocess
@@ -19,7 +20,7 @@ ROOT = Path(__file__).resolve().parent
 SCRIPT = ROOT / "transcribe.py"
 ASSET = ROOT / "transcribe_assets" / "silero_vad_v6.onnx"
 EXPECTED_SCRIPT_SHA256 = (
-    "e27add42e280781e0a98efa1e032a2675fcd9feb459d5e8a2e736e01e1d34e78"
+    "fe781182519f9afa2e60b76afc5f82409fd6a98b799989109f3a38f696f4bd54"
 )
 EXPECTED_ASSET_SHA256 = (
     "914fd98ac0a73d69ba1e70c9b1d66acb740eff90500dfde08b89a961b168a6a9"
@@ -28,6 +29,43 @@ ASR_MODEL_ID = "CohereLabs/cohere-transcribe-arabic-07-2026"
 ASR_REVISION = "0a8193caa4f3f92131471ab08824e488141cb392"
 ALIGN_MODEL_ID = "MahmoudAshraf/mms-300m-1130-forced-aligner"
 ALIGN_REVISION = "49402e9577b1158620820667c218cd494cc44486"
+ALIGN_PACKAGE_REPOSITORY = "https://github.com/MahmoudAshraf97/ctc-forced-aligner.git"
+ALIGN_PACKAGE_REVISION = "c344f5bc900323aa434a7cb200b7c629d463bd02"
+ALIGN_PACKAGE_VERSION = "0.3.0"
+UROMAN_VERSION = "1.3.1.1"
+ALIGN_VOCABULARY = (
+    "<blank>",
+    "<pad>",
+    "</s>",
+    "<unk>",
+    "a",
+    "i",
+    "e",
+    "n",
+    "o",
+    "u",
+    "t",
+    "s",
+    "r",
+    "m",
+    "k",
+    "l",
+    "d",
+    "g",
+    "h",
+    "y",
+    "b",
+    "p",
+    "w",
+    "c",
+    "v",
+    "j",
+    "z",
+    "f",
+    "'",
+    "q",
+    "x",
+)
 
 
 class Results:
@@ -60,6 +98,42 @@ def distribution_version(name: str) -> str | None:
         return importlib.metadata.version(name)
     except importlib.metadata.PackageNotFoundError:
         return None
+
+
+def validate_alignment_provenance(results: Results) -> None:
+    try:
+        distribution = importlib.metadata.distribution("ctc-forced-aligner")
+        direct_url_text = distribution.read_text("direct_url.json")
+        direct_url = json.loads(direct_url_text) if direct_url_text else None
+    except (importlib.metadata.PackageNotFoundError, json.JSONDecodeError) as exc:
+        results.fail(f"alignment package provenance: {type(exc).__name__}: {exc}")
+        return
+
+    if distribution.version != ALIGN_PACKAGE_VERSION:
+        results.fail(
+            f"alignment package version: expected {ALIGN_PACKAGE_VERSION}, "
+            f"found {distribution.version}"
+        )
+        return
+    if not isinstance(direct_url, dict):
+        results.fail("alignment package has no PEP 610 direct Git provenance")
+        return
+    vcs_info = direct_url.get("vcs_info")
+    repository = str(direct_url.get("url", "")).rstrip("/")
+    if (
+        repository != ALIGN_PACKAGE_REPOSITORY.rstrip("/")
+        or not isinstance(vcs_info, dict)
+        or vcs_info.get("vcs") != "git"
+        or vcs_info.get("commit_id") != ALIGN_PACKAGE_REVISION
+    ):
+        results.fail(
+            "alignment package provenance does not match the evaluated official "
+            f"revision {ALIGN_PACKAGE_REVISION}"
+        )
+        return
+    results.ok(
+        f"official alignment package {distribution.version} at {ALIGN_PACKAGE_REVISION}"
+    )
 
 
 def import_required(results: Results, module: str, feature: str):
@@ -194,8 +268,39 @@ def validate_silero(results: Results) -> None:
 
 def validate_word_alignment(results: Results, torch) -> None:
     torchaudio = import_required(results, "torchaudio", "word alignment")
-    import_required(results, "ctc_forced_aligner", "alignment tokenizer")
-    import_required(results, "unidecode", "Arabic alignment romanization")
+    aligner = import_required(results, "ctc_forced_aligner", "alignment utilities")
+    import_required(results, "uroman", "Arabic alignment romanization")
+    validate_alignment_provenance(results)
+    if distribution_version("uroman") != UROMAN_VERSION:
+        results.fail(
+            f"Uroman version: expected {UROMAN_VERSION}, "
+            f"found {distribution_version('uroman') or 'missing'}"
+        )
+    else:
+        results.ok(f"Uroman version: {UROMAN_VERSION}")
+    if aligner is not None:
+        required_symbols = (
+            "merge_repeats",
+            "get_spans",
+            "preprocess_text",
+            "postprocess_results",
+        )
+        missing = [name for name in required_symbols if not hasattr(aligner, name)]
+        if missing:
+            results.fail(f"alignment utility exports are missing: {missing}")
+        else:
+            try:
+                tokens, _ = aligner.preprocess_text(
+                    "مرحبا بكم في العالم", romanize=True, language="ara"
+                )
+                if tokens[-1] != "a l ' a l m":
+                    raise RuntimeError(f"unexpected Uroman tokens: {tokens!r}")
+            except Exception as exc:
+                results.fail(
+                    f"official Arabic romanization smoke test: {type(exc).__name__}: {exc}"
+                )
+            else:
+                results.ok("official Arabic Uroman path executes")
     if torch is None or torchaudio is None:
         return
 
@@ -251,7 +356,7 @@ def report_optional_runtime(results: Results) -> None:
 def validate_model_access(results: Results, include_aligner: bool) -> None:
     try:
         from huggingface_hub import hf_hub_download
-        from transformers import AutoProcessor
+        from transformers import AutoConfig, AutoProcessor, AutoTokenizer
 
         processor = AutoProcessor.from_pretrained(ASR_MODEL_ID, revision=ASR_REVISION)
         maximum = getattr(processor.feature_extractor, "max_audio_clip_s", None)
@@ -259,7 +364,23 @@ def validate_model_access(results: Results, include_aligner: bool) -> None:
             raise RuntimeError("processor does not expose max_audio_clip_s")
         hf_hub_download(ASR_MODEL_ID, "config.json", revision=ASR_REVISION)
         if include_aligner:
-            hf_hub_download(ALIGN_MODEL_ID, "config.json", revision=ALIGN_REVISION)
+            aligner_config = AutoConfig.from_pretrained(
+                ALIGN_MODEL_ID, revision=ALIGN_REVISION
+            )
+            aligner_tokenizer = AutoTokenizer.from_pretrained(
+                ALIGN_MODEL_ID,
+                revision=ALIGN_REVISION,
+                word_delimiter_token=None,
+            )
+            expected_vocabulary = {
+                token: index for index, token in enumerate(ALIGN_VOCABULARY)
+            }
+            if aligner_tokenizer.get_vocab() != expected_vocabulary:
+                raise RuntimeError("pinned aligner tokenizer vocabulary changed")
+            if aligner_tokenizer.pad_token_id != 1:
+                raise RuntimeError("pinned aligner tokenizer pad ID changed")
+            if getattr(aligner_config, "inputs_to_logits_ratio", None) != 320:
+                raise RuntimeError("pinned aligner input stride changed")
     except Exception as exc:
         results.fail(f"pinned model access: {type(exc).__name__}: {exc}")
     else:

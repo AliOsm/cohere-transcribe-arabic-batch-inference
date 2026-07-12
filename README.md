@@ -4,6 +4,8 @@ This directory is the self-contained production runtime for `transcribe.py`. It 
 
 The model weights are not redistributed here. The script downloads pinned revisions from Hugging Face on first use after you accept the Cohere model's access terms.
 
+Word alignment uses the maintained `MahmoudAshraf97/ctc-forced-aligner` implementation pinned to an exact Git commit and its Uroman Arabic normalization path; `pip install -r requirements.txt` fetches and builds it automatically.
+
 ## Start here
 
 1. Follow [`SETUP.md`](SETUP.md) to install the system packages, a device-appropriate PyTorch/TorchAudio pair, and `requirements.txt`.
@@ -28,7 +30,7 @@ For word-level timestamps, replace `--alignment segment` with `--alignment word`
 | `transcribe.py` | Production CLI |
 | `transcribe_assets/` | Pinned vectorized Silero runtime, ONNX model, and upstream licenses |
 | `requirements.txt` | Cross-device Python runtime, excluding PyTorch/TorchAudio |
-| `requirements-optional.txt` | TorchCodec and Auditok modes |
+| `requirements-optional.txt` | Optional Auditok VAD mode |
 | `validate_install.py` | Offline dependency and kernel smoke tests; optional model-access check |
 | `VERSION.json` | Model revisions and validated environment |
 

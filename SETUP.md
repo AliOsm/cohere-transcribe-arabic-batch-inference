@@ -26,12 +26,12 @@ Ubuntu/Debian:
 
 ```bash
 sudo apt update
-sudo apt install -y python3-venv python3-dev build-essential ffmpeg libsndfile1
+sudo apt install -y python3-venv python3-dev build-essential git ffmpeg libsndfile1
 ```
 
-`python3-dev` and `build-essential` are used when installing `ctc-forced-aligner`. FFmpeg is the robust fallback for compressed and video containers. A standalone CUDA toolkit is not required when using official PyTorch wheels; the NVIDIA driver is required.
+`git`, `python3-dev`, and `build-essential` are used to fetch and compile the official `ctc-forced-aligner` revision pinned in `requirements.txt`. FFmpeg is the robust fallback for compressed and video containers. A standalone CUDA toolkit is not required when using official PyTorch wheels; the NVIDIA driver is required.
 
-On Windows, WSL2 with an NVIDIA-enabled Ubuntu distribution is the closest equivalent to the validated environment. Native Windows and Apple installations need the corresponding compiler/audio prerequisites if a package lacks a wheel.
+On Windows, WSL2 with an NVIDIA-enabled Ubuntu distribution is the closest equivalent to the validated environment. Native Windows requires Git, FFmpeg, and Microsoft C++ Build Tools with the Desktop development with C++ workload. macOS requires Git, FFmpeg, libsndfile, and the Xcode command-line tools (`xcode-select --install`).
 
 Create an isolated environment:
 
@@ -93,13 +93,15 @@ For the supported version range:
 pip install -r requirements.txt
 ```
 
+This command clones the maintained forced-aligner package from its pinned GitHub commit, builds its small pybind11 extension, and installs the pinned Uroman runtime automatically. Install the device-specific Torch/TorchAudio pair first so the aligner's broad dependency declaration reuses that environment.
+
 Install optional modes only when needed:
 
 ```bash
 pip install -r requirements-optional.txt
 ```
 
-- TorchCodec enables `--audio-backend torchcodec`; `auto` works without it by using librosa and falling back to FFmpeg.
+- TorchCodec is installed with the official aligner dependency and enables `--audio-backend torchcodec`; `auto` can still fall back to librosa or FFmpeg when decoding fails.
 - Auditok enables `--vad auditok`; Silero is the production default. Auditok may require PortAudio development packages because of its optional PyAudio dependency.
 
 ## 5. Accept and authenticate for the Cohere model
@@ -127,6 +129,8 @@ CohereLabs/cohere-transcribe-arabic-07-2026
   0a8193caa4f3f92131471ab08824e488141cb392
 MahmoudAshraf/mms-300m-1130-forced-aligner
   49402e9577b1158620820667c218cd494cc44486
+MahmoudAshraf97/ctc-forced-aligner
+  c344f5bc900323aa434a7cb200b7c629d463bd02
 ```
 
 Use `HF_HOME` to move the model cache to a larger disk:
@@ -139,13 +143,13 @@ After both models are cached, `HF_HUB_OFFLINE=1` prevents network checks.
 
 ## 6. Validate before loading model weights
 
-The validator checks hashes, imports, the CLI, the bundled ONNX VAD, matching Torch/TorchAudio versions, and TorchAudio's forced-align operation. It does not load the 2B model.
+The validator checks hashes, imports, the CLI, the bundled ONNX VAD, the exact official aligner Git provenance, Uroman, matching Torch/TorchAudio versions, and TorchAudio's forced-align operation. It does not load the 2B model.
 
 ```bash
 python validate_install.py
 ```
 
-Also verify access to the pinned Hugging Face processor/config files:
+Also verify access to the pinned Hugging Face processor, aligner tokenizer, and configuration files:
 
 ```bash
 python validate_install.py --model-access
@@ -184,6 +188,10 @@ python transcribe.py input.wav \
 ```
 
 `--align-dtype fp16` is much faster on CUDA and usually produces nearly identical boundaries, but FP32 remains the strict timestamp reference.
+
+The maintained-package migration was checked against frozen ASR output for 500 balanced clips and `1.wav`: all 15,874 word texts and keys were preserved, no invalid intervals were produced, and `1.wav` retained zero alignment fallbacks. The 500-clip set changed from two to three fallbacks because one pathological 0.7-second segment contains a single word with roughly 100 repeated alefs; Uroman preserves those letters while the former Unidecode path discarded them, so the complete target cannot fit the available CTC frames.
+
+There are no human word-boundary labels in these retained sets. Old-to-current drift therefore measures the intentional implementation change, not absolute timestamp accuracy: the FP32 median was 20 ms for both corpora, with p95 140 ms on the 500 clips and 100 ms on `1.wav`. Current FP16 and FP32 boundaries matched within 20 ms for 99.77% of the 500-set boundaries and 99.94% of the `1.wav` boundaries. Exact provenance and timing measurements are recorded in `VERSION.json`.
 
 ### Plain text
 
@@ -271,13 +279,14 @@ python transcribe.py input.wav --dtype fp16
 
 Accept the terms in the browser for the same Hugging Face account used by `hf auth login`. Confirm with `python validate_install.py --model-access`.
 
-### `unidecode` or forced alignment missing
+### Uroman or forced alignment missing
 
 ```bash
-pip install ctc-forced-aligner==1.0.2 unidecode
+pip uninstall -y ctc-forced-aligner
+pip install -r requirements.txt
 ```
 
-Also confirm that TorchAudio matches Torch exactly at the major/minor release.
+This replaces any package installed from the unrelated PyPI project with the maintained GitHub revision. Also confirm that Git and a C++ compiler are available and that TorchAudio matches Torch exactly at the major/minor release.
 
 ### ONNX Runtime DRM warning
 

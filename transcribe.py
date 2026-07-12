@@ -51,6 +51,10 @@ ALIGN_MODEL_ID = "MahmoudAshraf/mms-300m-1130-forced-aligner"
 # These are the exact revisions used by the accuracy and throughput evaluation.
 ASR_MODEL_REVISION = "0a8193caa4f3f92131471ab08824e488141cb392"
 ALIGN_MODEL_REVISION = "49402e9577b1158620820667c218cd494cc44486"
+ALIGN_PACKAGE_REPOSITORY = "https://github.com/MahmoudAshraf97/ctc-forced-aligner.git"
+ALIGN_PACKAGE_REVISION = "c344f5bc900323aa434a7cb200b7c629d463bd02"
+OUTPUT_SCHEMA_VERSION = 4
+PROFILE_SCHEMA_VERSION = 3
 SR = 16_000
 ALIGN_WINDOW_S = 30
 ALIGN_CONTEXT_S = 2
@@ -2332,10 +2336,13 @@ def load_aligner(
     dtype: torch.dtype,
     revision: str | None = ALIGN_MODEL_REVISION,
 ):
-    from ctc_forced_aligner import Tokenizer
-    from transformers import Wav2Vec2ForCTC
+    from transformers import AutoTokenizer, Wav2Vec2ForCTC
 
-    tokenizer = Tokenizer()
+    tokenizer = AutoTokenizer.from_pretrained(
+        ALIGN_MODEL_ID,
+        revision=revision,
+        word_delimiter_token=None,
+    )
     model = Wav2Vec2ForCTC.from_pretrained(
         ALIGN_MODEL_ID,
         dtype=dtype,
@@ -2345,6 +2352,26 @@ def load_aligner(
     model.to(device)
     model.eval()
     return tokenizer, model
+
+
+def alignment_frame_geometry(model) -> tuple[int, int, int]:
+    config = getattr(model, "config", None)
+    raw_ratio = getattr(config, "inputs_to_logits_ratio", None)
+    if isinstance(raw_ratio, bool) or not isinstance(raw_ratio, (int, np.integer)):
+        raise RuntimeError(
+            "Aligner config must define an integer inputs_to_logits_ratio"
+        )
+    ratio = int(raw_ratio)
+    if ratio <= 0:
+        raise RuntimeError("Aligner inputs_to_logits_ratio must be positive")
+
+    window_samples = ALIGN_WINDOW_S * SR
+    context_samples = ALIGN_CONTEXT_S * SR
+    if window_samples % ratio or context_samples % ratio:
+        raise RuntimeError(
+            "Alignment window and context must be divisible by the model input stride"
+        )
+    return ratio, window_samples // ratio, context_samples // ratio
 
 
 def build_alignment_window_batch(
@@ -2371,14 +2398,12 @@ def build_alignment_window_batch(
 
 
 def _compute_emissions_streaming(audio: np.ndarray, model, batch_size: int, label: str):
-    from ctc_forced_aligner import time_to_frame
-
     window_samples = ALIGN_WINDOW_S * SR
     context_samples = ALIGN_CONTEXT_S * SR
+    ratio, window_frames, context_frames = alignment_frame_geometry(model)
     total_windows = math.ceil(len(audio) / window_samples)
     extension_samples = total_windows * window_samples - len(audio)
-    extension_frames = time_to_frame(extension_samples / SR)
-    context_frames = time_to_frame(ALIGN_CONTEXT_S)
+    extension_frames = extension_samples // ratio
     emissions: np.ndarray | None = None
     write_offset = 0
     first_window = 0
@@ -2410,7 +2435,14 @@ def _compute_emissions_streaming(audio: np.ndarray, model, batch_size: int, labe
                 )
                 with torch.inference_mode():
                     logits = model(values).logits
-                    logits = logits[:, context_frames : -context_frames + 1, :]
+                    required_frames = context_frames + window_frames
+                    if logits.shape[1] < required_frames:
+                        raise RuntimeError(
+                            "Aligner returned too few frames for the configured window"
+                        )
+                    logits = logits[
+                        :, context_frames : context_frames + window_frames, :
+                    ]
                     # Stable in FP32 on the accelerator; avoids exp overflow and
                     # transfers only normalized, cropped frames to host memory.
                     log_probs_tensor = torch.log_softmax(logits.float(), dim=-1)
@@ -2439,13 +2471,13 @@ def _compute_emissions_streaming(audio: np.ndarray, model, batch_size: int, labe
 
             del input_batch
             batch_log_probs = batch_log_probs.reshape(-1, batch_log_probs.shape[-1])
+            expected_batch_frames = window_count * window_frames
+            if batch_log_probs.shape[0] != expected_batch_frames:
+                raise RuntimeError(
+                    "Aligner returned an unexpected number of frames for its windows"
+                )
             if emissions is None:
-                if batch_log_probs.shape[0] % window_count:
-                    raise RuntimeError(
-                        "Aligner frame count is not divisible by its fixed-size windows"
-                    )
-                frames_per_window = batch_log_probs.shape[0] // window_count
-                frame_count = total_windows * frames_per_window - extension_frames
+                frame_count = total_windows * window_frames - extension_frames
                 if frame_count <= 0:
                     raise RuntimeError("Aligner produced no usable CTC frames")
                 emissions = np.zeros(
@@ -2473,8 +2505,8 @@ def _compute_emissions_streaming(audio: np.ndarray, model, batch_size: int, labe
             f"Aligner emission assembly mismatch: wrote {write_offset} frames, "
             f"expected {0 if emissions is None else len(emissions)}"
         )
-    stride = float(len(audio) * 1000 / emissions.shape[0] / SR)
-    return emissions, math.ceil(stride)
+    stride = ratio * 1000 / SR
+    return emissions, stride
 
 
 def compute_emissions_streaming(
@@ -2482,7 +2514,7 @@ def compute_emissions_streaming(
     model,
     batch_size: int,
     label: str,
-) -> tuple[np.ndarray, int]:
+) -> tuple[np.ndarray, float]:
     if len(audio) == 0:
         raise ValueError("Cannot compute CTC emissions for empty audio")
     return _compute_emissions_streaming(audio, model, max(1, batch_size), label)
@@ -2653,7 +2685,7 @@ def speech_spans_within_segment(
 
 def align_words(
     emissions: np.ndarray,
-    stride: int,
+    stride: float,
     tokenizer,
     segment_times: Sequence[tuple[float, float]],
     segment_texts: Sequence[str],
@@ -2834,7 +2866,7 @@ def generate_json(
         if text.strip()
     ]
     payload = {
-        "schema_version": 3,
+        "schema_version": OUTPUT_SCHEMA_VERSION,
         "source": {
             "path": os.fspath(job.path),
             "duration_seconds": job.duration,
@@ -2860,7 +2892,13 @@ def generate_json(
         "models": {
             "asr": {"id": MODEL_ID, "revision": ASR_MODEL_REVISION},
             "aligner": (
-                {"id": ALIGN_MODEL_ID, "revision": ALIGN_MODEL_REVISION}
+                {
+                    "id": ALIGN_MODEL_ID,
+                    "revision": ALIGN_MODEL_REVISION,
+                    "package_repository": ALIGN_PACKAGE_REPOSITORY,
+                    "package_revision": ALIGN_PACKAGE_REVISION,
+                    "romanizer": "uroman",
+                }
                 if job.alignment_mode == "word"
                 else None
             ),
@@ -3404,6 +3442,41 @@ def package_version(name: str) -> str | None:
         return None
 
 
+def validate_alignment_package_source() -> None:
+    try:
+        distribution = importlib_metadata.distribution("ctc-forced-aligner")
+        direct_url_text = distribution.read_text("direct_url.json")
+        direct_url = json.loads(direct_url_text) if direct_url_text else None
+    except (importlib_metadata.PackageNotFoundError, json.JSONDecodeError) as exc:
+        raise SystemExit(
+            "Cannot verify the official ctc-forced-aligner installation. "
+            "Reinstall it with: pip install -r requirements.txt"
+        ) from exc
+
+    if not isinstance(direct_url, dict):
+        raise SystemExit(
+            "ctc-forced-aligner was not installed from the pinned official Git source. "
+            "Reinstall it with: pip install -r requirements.txt"
+        )
+    vcs_info = direct_url.get("vcs_info")
+    if not isinstance(vcs_info, dict):
+        raise SystemExit("ctc-forced-aligner installation is missing Git provenance")
+    repository = str(direct_url.get("url", "")).rstrip("/")
+    if repository != ALIGN_PACKAGE_REPOSITORY.rstrip("/"):
+        raise SystemExit(
+            "ctc-forced-aligner is installed from an unexpected repository: "
+            f"{repository or 'unknown'}"
+        )
+    if (
+        vcs_info.get("vcs") != "git"
+        or vcs_info.get("commit_id") != ALIGN_PACKAGE_REVISION
+    ):
+        raise SystemExit(
+            "ctc-forced-aligner is not installed at the evaluated Git revision "
+            f"{ALIGN_PACKAGE_REVISION}"
+        )
+
+
 def release_pair(version_text: str) -> tuple[int, int] | None:
     from packaging.version import InvalidVersion, Version
 
@@ -3464,9 +3537,9 @@ def preflight_runtime(args: TranscriptionConfig) -> None:
     if args.alignment == "word":
         required.extend(
             [
-                ("ctc_forced_aligner", "word alignment", "ctc-forced-aligner"),
+                ("ctc_forced_aligner", "word alignment", "-r requirements.txt"),
                 ("torchaudio", "word alignment", "torchaudio"),
-                ("unidecode", "word-alignment romanization", "unidecode"),
+                ("uroman", "word-alignment romanization", "-r requirements.txt"),
             ]
         )
     if args.audio_backend == "torchcodec":
@@ -3498,6 +3571,7 @@ def preflight_runtime(args: TranscriptionConfig) -> None:
         )
 
     if args.alignment == "word":
+        validate_alignment_package_source()
         torch_pair = release_pair(torch.__version__)
         torchaudio_version = package_version("torchaudio")
         audio_pair = release_pair(torchaudio_version or "")
@@ -4067,6 +4141,7 @@ def runtime_environment(device: str, dtype: torch.dtype) -> dict[str, Any]:
         "onnxruntime",
         "silero-vad",
         "ctc-forced-aligner",
+        "uroman",
         "torchcodec",
         "librosa",
         "auditok",
@@ -4141,12 +4216,18 @@ def build_profile_payload(
         else None
     )
     return {
-        "schema_version": 2,
+        "schema_version": PROFILE_SCHEMA_VERSION,
         "created_unix_seconds": time.time(),
         "models": {
             "asr": {"id": MODEL_ID, "revision": ASR_MODEL_REVISION},
             "aligner": (
-                {"id": ALIGN_MODEL_ID, "revision": ALIGN_MODEL_REVISION}
+                {
+                    "id": ALIGN_MODEL_ID,
+                    "revision": ALIGN_MODEL_REVISION,
+                    "package_repository": ALIGN_PACKAGE_REPOSITORY,
+                    "package_revision": ALIGN_PACKAGE_REVISION,
+                    "romanizer": "uroman",
+                }
                 if args.alignment == "word"
                 else None
             ),
