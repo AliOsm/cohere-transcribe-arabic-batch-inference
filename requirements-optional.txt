@@ -1,5 +1,0 @@
-# Optional modes. Install only what you use.
-
-# Enables `--vad auditok`. This can pull PyAudio/PortAudio build dependencies;
-# the default Silero mode does not need it.
-auditok==0.3.0

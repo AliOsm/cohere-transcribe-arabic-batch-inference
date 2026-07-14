@@ -1,0 +1,1176 @@
+{
+  "package_version": "0.1.0",
+  "validation_snapshot": "2026.07.14-final-python-api",
+  "created_at": "2026-07-14",
+  "entry_point": "cohere-transcribe",
+  "default_alignment": "segment",
+  "validated_monolith_sha256": "f31aac815ae15c82328d25cc45b98711aa63779d74e669b9427541289b17b04a",
+  "output_schema_version": 7,
+  "profile_schema_version": 8,
+  "state_contract_schema_version": 2,
+  "python_validated": "3.12.12",
+  "torch_validated": "2.11.0+cu128",
+  "torchaudio_validated": "2.11.0+cu128",
+  "transformers_validated": "5.13.1",
+  "cuda_runtime_validated": "12.8",
+  "gpu_validated": "NVIDIA GeForce RTX 3060 12 GB",
+  "asr_model": {
+    "id": "CohereLabs/cohere-transcribe-arabic-07-2026",
+    "revision": "0a8193caa4f3f92131471ab08824e488141cb392"
+  },
+  "alignment_model": {
+    "id": "MahmoudAshraf/mms-300m-1130-forced-aligner",
+    "revision": "49402e9577b1158620820667c218cd494cc44486"
+  },
+  "alignment_runtime": {
+    "role": "Uroman normalization, span construction, and timestamp postprocessing utilities",
+    "distribution": "cohere-transcribe-arabic",
+    "location": "cohere_transcribe.alignment",
+    "repository": "https://github.com/MahmoudAshraf97/ctc-forced-aligner.git",
+    "revision": "11855d1de76af2b490dd2e8e2db2661805ae90a0",
+    "kernel": {
+      "distribution": "torchaudio",
+      "operation": "torchaudio.functional.forced_align",
+      "version_validated": "2.11.0+cu128"
+    },
+    "romanizer": {
+      "distribution": "uroman",
+      "version": "1.3.1.1"
+    }
+  },
+  "alignment_migration_validation": {
+    "evaluated_at": "2026-07-12",
+    "benchmark_utility_revision": "c344f5bc900323aa434a7cb200b7c629d463bd02",
+    "packaged_utility_revision": "11855d1de76af2b490dd2e8e2db2661805ae90a0",
+    "packaged_revision_delta": "Upstream main changed only the unused per-word score aggregation from sum to mean after the benchmark revision. The package does not publish or consume that score; text, spans, and timestamps are unchanged.",
+    "interpretation": "No retained corpus has human word-boundary labels. Old-to-current drift measures an implementation change, not absolute timestamp accuracy.",
+    "balanced_500": {
+      "input_sha256": "5860c724c22205949c7ce68b099c6d22065764b829c15ac48fe8cfbc480bcb0f",
+      "clips": 500,
+      "words": 6119,
+      "transcript_or_word_identity_mismatches": 0,
+      "invalid_intervals": 0,
+      "fallbacks_before": 2,
+      "fallbacks_after": 3,
+      "additional_fallback": "One 0.7-second pathological ASR segment contains a word with roughly 100 repeated alefs; Uroman preserves the acoustically infeasible target that Unidecode shortened.",
+      "fp32_old_to_current_boundary_drift_ms": {
+        "mean_absolute": 45.6,
+        "median": 20.0,
+        "p95": 140.0,
+        "p99": 560.0,
+        "maximum": 3680.0,
+        "within_100_ms_percent": 92.19
+      },
+      "fp16_compute_seconds_before": 66.64,
+      "fp16_compute_seconds_after": 67.22,
+      "fp16_cues_before": 1194,
+      "fp16_cues_after": 1138,
+      "fp32_compute_seconds_before": 178.0,
+      "fp32_compute_seconds_after": 173.03,
+      "fp32_cues_before": 1192,
+      "fp32_cues_after": 1138
+    },
+    "long_form_lecture": {
+      "input_sha256": "981512e8b118822ba19a66ccf1561c25824e745f903a1fa7fcb06002e77fb4df",
+      "audio_sha256": "d3a1e72c2bb8d5df24ee599a64700fd994b4db30c383029e87f07e7fe6844cc5",
+      "audio_seconds": 4160.6791875,
+      "words": 9755,
+      "transcript_or_word_identity_mismatches": 0,
+      "invalid_intervals": 0,
+      "fallbacks_before": 0,
+      "fallbacks_after": 0,
+      "fp32_old_to_current_boundary_drift_ms": {
+        "mean_absolute": 30.62,
+        "median": 20.0,
+        "p95": 100.0,
+        "p99": 180.0,
+        "maximum": 4540.0,
+        "within_100_ms_percent": 96.98
+      },
+      "fp16_compute_seconds_before": 17.43,
+      "fp16_compute_seconds_after": 19.58,
+      "fp16_cues_before": 1225,
+      "fp16_cues_after": 1175,
+      "fp32_compute_seconds_before": 47.1,
+      "fp32_compute_seconds_after": 46.24,
+      "fp32_cues_before": 1225,
+      "fp32_cues_after": 1175,
+      "two_precision_harness_seconds_before": 77.53,
+      "two_precision_harness_seconds_after": 78.05
+    },
+    "current_fp16_vs_fp32": {
+      "balanced_500_within_20_ms_percent": 99.77,
+      "long_form_lecture_within_20_ms_percent": 99.94
+    },
+    "end_to_end_long_form_smoke": {
+      "configuration": "Silero merge, batch 24, FP16 word alignment",
+      "elapsed_seconds": 57.75,
+      "segments": 182,
+      "words": 9852,
+      "cues": 1226,
+      "fallback_alignments": 0,
+      "generated_tokens": 28277,
+      "pre_migration_asr_text_sha256": "11e07d260a45355f0b618dfbd0a3c6d81ae8b0074f1a767bdb153e2f82632dd6",
+      "current_asr_text_sha256": "11e07d260a45355f0b618dfbd0a3c6d81ae8b0074f1a767bdb153e2f82632dd6"
+    }
+  },
+  "silero_vad": {
+    "source": "silero-vad",
+    "source_version": "6.2.1",
+    "distribution": "cohere-transcribe-arabic",
+    "torchscript_sha256": "e1122837f4154c511485fe0b9c64455f7b929c96fbb8d79fbdb336383ebd3720",
+    "packed_torch_runtime_sha256": "b5c7640872674ad599e8057198b73e4c3b65a3d0d02d213948a9e0a86db5e1bc",
+    "shared_timestamp_runtime_sha256": "d0186ea234989825a1ad8a986a9a1ef32e2b1f6d77b30c3367f92d323d30d092",
+    "sequence_onnx_sha256": "914fd98ac0a73d69ba1e70c9b1d66acb740eff90500dfde08b89a961b168a6a9",
+    "default": {
+      "engine": "auto selects packed CPU Torch",
+      "file_batch_size": 16,
+      "block_frames": 512,
+      "maximum_configured_padded_frames": 32768,
+      "fallback": "sequence ONNX, then side-effect-free packaged TorchScript"
+    },
+    "batch_validation": {
+      "evaluated_at": "2026-07-13",
+      "hardware": "AMD Ryzen 5 5600X and NVIDIA GeForce RTX 3060 12 GB",
+      "balanced_500": {
+        "files": 500,
+        "audio_seconds": 5035.7145,
+        "datasets": [
+          "Casablanca",
+          "Common Voice 18 Arabic",
+          "FLEURS ar_eg",
+          "Quran ayah CA sample",
+          "SADA22"
+        ],
+        "exact_timestamp_lists": "500/500",
+        "maximum_probability_difference": 0.0000273,
+        "isolated_vad_seconds": {
+          "packed_torch_batch16_block512": 1.6757,
+          "sequence_onnx_single_thread": 5.9377
+        },
+        "five_run_full_asr_medians_seconds": {
+          "packed_torch": 38.369,
+          "sequence_onnx": 38.592,
+          "paired_torch_advantage": 0.208
+        },
+        "five_run_external_wall_medians_seconds": {
+          "packed_torch": 40.11,
+          "sequence_onnx": 40.33
+        },
+        "five_run_user_cpu_medians_seconds": {
+          "packed_torch": 66.17,
+          "sequence_onnx": 70.09
+        },
+        "five_run_peak_rss_medians_mib": {
+          "packed_torch": 5104.13,
+          "sequence_onnx": 5080.90
+        },
+        "full_asr_vad_worker_medians_seconds": {
+          "packed_torch": 2.262,
+          "sequence_onnx": 7.153
+        },
+        "full_asr_exposed_preparation_wait_medians_seconds": {
+          "packed_torch": 0.046,
+          "sequence_onnx": 0.440
+        },
+        "repeated_transcript_byte_identity": "2500/2500 files across five paired runs"
+      },
+      "long_form_lecture": {
+        "audio_seconds": 4160.6791875,
+        "exact_timestamp_lists": "1/1",
+        "speech_spans": 378
+      },
+      "mixed_501": {
+        "files": 501,
+        "audio_seconds": 9196.3936875,
+        "block256_median_seconds": 4.8228,
+        "block512_median_seconds": 4.8052,
+        "block1024_median_seconds": 4.7574
+      },
+      "packaged_weight_end_to_end_long_form": {
+        "external_wall_seconds": 31.24,
+        "profile_elapsed_seconds": 30.3715,
+        "decode_backend": "torchcodec",
+        "vad_engine": "packed CPU Torch",
+        "segments": 182,
+        "generated_tokens": 28277,
+        "txt_sha256": "11e07d260a45355f0b618dfbd0a3c6d81ae8b0074f1a767bdb153e2f82632dd6",
+        "srt_sha256": "f4735a25f5a55b19b8a8524de6f2310efde596f6cdee20bfa577c7caba0c8801",
+        "vtt_sha256": "fe9267234e755ac57230cbc909fe262e0e368deba34c0539cb201159cb588e7a",
+        "retained_output_identity": true,
+        "interpretation": "Packaging the exact Silero TorchScript weight and removing the silero-vad Python dependency preserved all established outputs and remained inside the retained performance range. This is one integration run, not a replacement for the paired median baseline."
+      }
+    }
+  },
+  "script_review": {
+    "evaluated_at": "2026-07-13",
+    "correctness_fixes": [
+      "Preserve original segment_index values in JSON when empty ASR segments are omitted.",
+      "Avoid floating-point frame loss for legal packed Torch VAD limits.",
+      "Jump directly to a nearby decoder retry ceiling instead of repeating 890 and 896-token passes.",
+      "Treat unsupported directory fsync and descriptor chmod operations portably."
+    ],
+    "telemetry_fixes": [
+      "Separate requested and resolved configurations.",
+      "Distinguish generation-call wall, CUDA device generation, H2D, and token analysis.",
+      "Account for discarded prefetched features separately from generation rows.",
+      "Record exact local runtime hashes and the TorchAudio forced-alignment kernel."
+    ],
+    "retained_alternatives": [
+      "Auditok and fixed-window segmentation remain explicit measured tradeoff modes.",
+      "Sequence ONNX and packaged TorchScript remain automatic and explicit Silero fallbacks.",
+      "Adaptive batching and pinned memory remain opt-in for unvalidated devices."
+    ]
+  },
+  "package_reorganization_validation": {
+    "evaluated_at": "2026-07-13",
+    "package_version": "0.1.0",
+    "unit_and_cpu_integration_tests": 165,
+    "librosa_integration_tests_at_reorganization": 1,
+    "module_ownership_refactor": {
+      "evaluated_at": "2026-07-13",
+      "structure": {
+        "audio": "inputs, audio_backends, decoding, segmentation, preparation, device, and vad runtime",
+        "asr": "asr_model, asr_generation, asr_batching, asr_execution, and asr scheduling",
+        "alignment": "lightweight package initializer, runtime module, and direct retained helpers",
+        "state": "state facade, contracts, I/O, checkpoints, manifests, locking, and cancellation",
+        "application": "transcription pipeline, output pipeline, pipeline resources and facade, config, preflight, profiling, outputs, doctor, and cli"
+      },
+      "static_validation": {
+        "internal_import_cycles": 0,
+        "ruff": "passed",
+        "compileall": "passed",
+        "pytest": "165 passed",
+        "twine_check": "passed",
+        "clean_wheel_install": "passed"
+      },
+      "installed_wheel_long_form_lecture": {
+        "external_wall_seconds": 33.44,
+        "profile_elapsed_seconds": 32.41953851800645,
+        "segments": 182,
+        "generation_batches": 8,
+        "generated_tokens": 28277,
+        "txt_sha256": "11e07d260a45355f0b618dfbd0a3c6d81ae8b0074f1a767bdb153e2f82632dd6",
+        "srt_sha256": "f4735a25f5a55b19b8a8524de6f2310efde596f6cdee20bfa577c7caba0c8801",
+        "vtt_sha256": "fe9267234e755ac57230cbc909fe262e0e368deba34c0539cb201159cb588e7a",
+        "retained_output_identity": true
+      },
+      "installed_wheel_balanced_500": {
+        "external_wall_seconds": [
+          40.01,
+          39.27,
+          38.48
+        ],
+        "external_wall_median_seconds": 39.27,
+        "profile_elapsed_seconds": [
+          38.97094863397069,
+          38.250144244986586,
+          37.432121700025164
+        ],
+        "profile_elapsed_median_seconds": 38.250144244986586,
+        "files": 500,
+        "audio_seconds": 5035.7145,
+        "segments": 729,
+        "generation_batches": 33,
+        "generated_tokens": 21587,
+        "torchcodec_files": 499,
+        "ffmpeg_recovery_files": 1,
+        "retained_transcript_matches": "500/500 in all three runs",
+        "delta_from_retained_package_median_percent": 0.93
+      },
+      "installed_wheel_word_alignment_smoke": {
+        "external_wall_seconds": 13.78,
+        "profile_elapsed_seconds": 12.723028487991542,
+        "files": 5,
+        "failed_files": 0,
+        "generated_tokens": 40,
+        "fallback_alignment_segments": 0,
+        "retained_transcript_matches": "5/5",
+        "interpretation": "The moved alignment runtime loaded the maintained MMS/TorchAudio path and aligned every speech segment. Timestamp differences from the older production_review_word5 artifacts are the already evaluated maintained-aligner migration, including the 20 ms inclusive word-end correction, not a module-refactor change."
+      },
+      "interpretation": "The responsibility split preserved the retained long-form and multi-file outputs exactly. Both installed-wheel wall times are inside the established run variance, so there is no measured performance regression."
+    },
+    "startup": {
+      "measurement": "fresh process, --help",
+      "eager_package_before_lazy_alignment_seconds": [
+        2.98,
+        3.01
+      ],
+      "hardened_package_seconds": [
+        0.09,
+        0.1
+      ],
+      "hardened_peak_rss_mib": 37,
+      "interpretation": "Lazy ML and Uroman imports removed the package-only startup regression; segment and text modes do not initialize word-alignment normalization."
+    },
+    "retained_historical_performance": {
+      "reliable_segment_timestamps": {
+        "external_wall_seconds": [
+          36.58,
+          36.39
+        ],
+        "median_seconds": 36.485,
+        "configuration": "Long-form Arabic grammar lecture, BF16, Silero merge, segment timestamps, static ASR batch 24, adaptive batching off, pinned transfers off"
+      },
+      "fast_text_only": {
+        "external_wall_seconds": 31.3,
+        "configuration": "Long-form Arabic grammar lecture, BF16, no VAD, fixed 30-second windows, text only, static ASR batch 24",
+        "processor_rows": 139,
+        "words": 9905
+      }
+    },
+    "installed_package_vs_frozen_monolith": {
+      "measurement": "GNU time external process wall, alternating sequential runs on the same RTX 3060 host",
+      "frozen_monolith_sha256": "f31aac815ae15c82328d25cc45b98711aa63779d74e669b9427541289b17b04a",
+      "reliable_longform_segment": {
+        "audio": "Long-form Arabic grammar lecture",
+        "audio_seconds": 4160.6791875,
+        "configuration": "Arabic, BF16, packed Torch Silero, VAD merge, segment timestamps, static ASR batch 24, adaptive batching off, pinned transfers off",
+        "package_wall_seconds": [
+          33.55,
+          33.63,
+          33.67
+        ],
+        "package_median_seconds": 33.63,
+        "monolith_wall_seconds": [
+          33.75,
+          33.77,
+          33.16
+        ],
+        "monolith_median_seconds": 33.75,
+        "final_built_wheel_smoke_seconds": 33.73,
+        "final_hardening_wheel_smoke_seconds": 33.77,
+        "package_delta_seconds": -0.12,
+        "package_delta_percent": -0.36,
+        "segments": 182,
+        "generation_batches": 8,
+        "generated_tokens": 28277,
+        "words": 9852,
+        "oom_or_generation_safety_events": 0,
+        "txt_sha256": "11e07d260a45355f0b618dfbd0a3c6d81ae8b0074f1a767bdb153e2f82632dd6",
+        "srt_sha256": "f4735a25f5a55b19b8a8524de6f2310efde596f6cdee20bfa577c7caba0c8801",
+        "vtt_sha256": "fe9267234e755ac57230cbc909fe262e0e368deba34c0539cb201159cb588e7a",
+        "package_monolith_output_identity": "3/3 paired runs for TXT, SRT, and VTT"
+      },
+      "fast_longform_text_only": {
+        "audio": "Long-form Arabic grammar lecture",
+        "audio_seconds": 4160.6791875,
+        "configuration": "Arabic, BF16, no VAD, fixed 30-second windows, text only, static ASR batch 24, adaptive batching off, pinned transfers off",
+        "package_wall_seconds": [
+          29.46,
+          29.75,
+          29.83
+        ],
+        "package_median_seconds": 29.75,
+        "monolith_wall_seconds": [
+          29.52,
+          30.02,
+          29.64
+        ],
+        "monolith_median_seconds": 29.64,
+        "package_delta_seconds": 0.11,
+        "package_delta_percent": 0.37,
+        "processor_rows": 139,
+        "generation_batches": 6,
+        "generated_tokens": 28203,
+        "words": 9905,
+        "txt_sha256": "be67c9b8a27145a7b789ac718ee4ca6279d947e0e4c4c04a839754cdd9cc3dc4",
+        "package_monolith_output_identity": "3/3 paired runs"
+      },
+      "balanced_500_file_batch": {
+        "files": 500,
+        "audio_seconds": 5035.7145,
+        "configuration": "Arabic, BF16, packed Torch Silero without merge, text only, 0.5 GiB decoded-audio groups, static ASR batch 24, adaptive batching off, pinned transfers off",
+        "package_wall_seconds": [
+          38.91,
+          38.75,
+          39.25,
+          39.75,
+          38.35
+        ],
+        "package_median_seconds": 38.91,
+        "monolith_wall_seconds": [
+          38.39,
+          39.62,
+          38.32,
+          39.46,
+          38.79
+        ],
+        "monolith_median_seconds": 38.79,
+        "final_built_wheel_smoke_seconds": 37.72,
+        "package_delta_seconds": 0.12,
+        "package_delta_percent": 0.31,
+        "processor_rows": 729,
+        "generation_batches": 33,
+        "generated_tokens": 21587,
+        "transcript_manifest_sha256": "a90bb1e99872c7bc50d1f3dceb4ff8f79d7149192b6751cbf58c4872ce824642",
+        "package_monolith_output_identity": "500/500 files in every one of five paired runs"
+      },
+      "interpretation": "All paired output hashes are identical. Long-form and 500-file wall-time deltas are at or below 0.37 percent and change direction by workload, so the package reorganization preserved the measured inference performance."
+    },
+    "text_only_live_parity": {
+      "files": 5,
+      "datasets": [
+        "Casablanca",
+        "Common Voice 18 Arabic",
+        "FLEURS ar_eg",
+        "Quran ayah CA sample",
+        "SADA22"
+      ],
+      "transcript_byte_matches": "5/5"
+    },
+    "word_alignment_live_parity": {
+      "files": 5,
+      "transcript_byte_matches": "5/5",
+      "exact_fields": [
+        "transcript",
+        "segments",
+        "words",
+        "cues",
+        "fallback alignment provenance",
+        "generation safety provenance"
+      ]
+    },
+    "artifact_validation": [
+      "Wheel and sdist built with uv_build from declared project metadata.",
+      "Wheel contains the exact Silero 6.2.1 TorchScript model, the sequence ONNX model, VAD notices, Uroman normalization table, and retained alignment provenance.",
+      "Wheel metadata contains no direct URL dependency.",
+      "Published dependency metadata declares TorchCodec 0.14 as core, packages Silero weights without its Python dependency, and isolates TorchAudio/Uroman in the word extra.",
+      "The clean-install release gate exercises the pip-installed default segment-mode runtime; word-mode validation installs the word extra explicitly.",
+      "A clean wheel installation with core Librosa passed the decoder-specific doctor and exactly decoded a generated 1,400-sample PCM WAV through explicit Librosa mode."
+    ],
+    "dependency_validation": {
+      "clean_pip_cpu_wheel": {
+        "python": "3.12.12",
+        "installation": "Torch 2.11.0+cpu and TorchCodec 0.14.0+cpu were selected from the official PyTorch CPU index, then the built wheel and remaining dependencies were installed with pip.",
+        "core_distributions": 39,
+        "word_distributions": 41,
+        "core_torchcodec_decode": "Exact 1,600-sample PCM WAV decode through automatic TorchCodec selection.",
+        "excluded_from_core_at_measurement_time": [
+          "librosa",
+          "silero-vad",
+          "torchaudio",
+          "uroman"
+        ],
+        "current_core_note": "Librosa was promoted to a core requirement during final CLI validation because the Cohere feature extractor imports it to construct mel filters; this older package-count measurement predates that correction.",
+        "word_validation": "Installing the word extra added matching TorchAudio and Uroman; the maintained forced-align operation and Arabic Uroman path both executed."
+      },
+      "auditok_0_3_to_0_4_2": {
+        "balanced_files": 500,
+        "exact_span_lists": "500/500",
+        "spans": 732,
+        "selected_audio_seconds": 4466.447,
+        "wall_seconds_0_3_0": 24.705,
+        "wall_seconds_0_4_2": 24.503,
+        "decision": "Use auditok>=0.4.2,<0.5; the lightweight 0.4 core removes unnecessary matplotlib, pydub, PyAudio, and PortAudio installation requirements without changing segmentation."
+      },
+      "maintained_ctc_forced_aligner": {
+        "main_revision": "11855d1de76af2b490dd2e8e2db2661805ae90a0",
+        "cold_import_seconds_full_upstream": [
+          5.81,
+          5.86
+        ],
+        "cold_import_peak_rss_mib_full_upstream": 958,
+        "cold_import_seconds_retained_helpers": [
+          1.94,
+          1.96
+        ],
+        "cold_import_peak_rss_mib_retained_helpers": 83,
+        "decision": "Package the four used pure-Python helpers from current main. A uv Git source applies only to the source workspace and is not retained in wheel metadata; a direct Git runtime dependency is not accepted by PyPI. Installing the complete upstream package also compiles and imports an unused native extension and CLI dependency stack."
+      },
+      "librosa_compatibility_historical_measurement": {
+        "python": "3.12.12",
+        "measurement_context": "Historical dependency-resolution measurement before TorchCodec moved into the core installation; the package counts are retained as provenance and are not the current core-versus-extra delta.",
+        "base_resolved_packages": 40,
+        "extra_resolved_packages": 61,
+        "librosa_version": "0.11.0",
+        "numba_version": "0.66.0",
+        "numpy_version": "2.4.6",
+        "soundfile_version": "0.14.0",
+        "decode_fixture_samples": 1400,
+        "decode_fixture_sample_rate": 16000,
+        "decoded_samples_identical": true,
+        "superseded_decision": "Librosa decoding remains explicit, but Librosa is now a core model dependency because the Cohere feature extractor imports it to construct mel filters. The historical package-count measurement is retained only as provenance."
+      },
+      "torchcodec_0_14": {
+        "torch_version": "2.11.0+cu128",
+        "torchcodec_version": "0.14.0+cpu",
+        "decode_fixture_samples": 6400,
+        "decode_fixture_sample_rate": 16000,
+        "backend_microbenchmark": {
+          "scope": "Audio decoding only; excludes VAD, ASR, alignment, and output publication.",
+          "sample_comparison": "Exact decoded sample-array equality.",
+          "methodology_limit": "The retained historical measurement did not record run count, summary statistic, worker count, or FFmpeg version; these numbers must not be presented as end-to-end ASR timings.",
+          "long_form_seconds_torchcodec": 3.613,
+          "long_form_seconds_ffmpeg": 3.834,
+          "long_form_speedup": 1.061,
+          "long_form_reduction_percent": 5.76,
+          "long_form_samples_identical": true,
+          "balanced_500_seconds_torchcodec": 3.787,
+          "balanced_500_seconds_ffmpeg": 20.087,
+          "balanced_500_speedup": 5.304,
+          "balanced_500_reduction_percent": 81.15,
+          "balanced_500_direct_torchcodec_sample_matches": "499/500",
+          "balanced_500_auto_completed_files": "500/500",
+          "fallback": "One malformed WAV failed direct TorchCodec decoding and was recovered by the per-file FFmpeg fallback."
+        },
+        "runtime_policy": {
+          "auto": "Use the core TorchCodec decoder first; if it is unusable and FFmpeg is available, select FFmpeg, and retry an individual TorchCodec decode failure with FFmpeg.",
+          "explicit_backends": "TorchCodec, FFmpeg, and Librosa are strict and never cross-fallback.",
+          "librosa": "Core model dependency and explicit compatibility decoder selected only through --audio-backend librosa."
+        },
+        "end_to_end_validation": {
+          "evaluated_at": "2026-07-13",
+          "hardware": "AMD Ryzen 5 5600X and NVIDIA GeForce RTX 3060 12 GB",
+          "methodology": "One integration run per workload after the automatic backend policy was implemented. These runs validate completion, backend provenance, and transcript parity; they are not paired decoder-speed estimates.",
+          "long_form_lecture": {
+            "audio_seconds": 4160.6791875,
+            "configuration": "Arabic, BF16, packed Torch Silero with merge, segment timing, static ASR batch 24",
+            "profile_elapsed_seconds": 31.6637,
+            "external_wall_seconds": 32.56,
+            "decode_worker_seconds": 2.2700,
+            "decode_backend": "torchcodec",
+            "fallbacks": 0,
+            "txt_sha256": "11e07d260a45355f0b618dfbd0a3c6d81ae8b0074f1a767bdb153e2f82632dd6",
+            "srt_sha256": "f4735a25f5a55b19b8a8524de6f2310efde596f6cdee20bfa577c7caba0c8801",
+            "vtt_sha256": "fe9267234e755ac57230cbc909fe262e0e368deba34c0539cb201159cb588e7a",
+            "retained_output_identity": true
+          },
+          "balanced_500": {
+            "files": 500,
+            "audio_seconds": 5035.7145,
+            "configuration": "Arabic, BF16, packed Torch Silero without merge, text only, 0.5 GiB requested decoded-audio groups, static ASR batch 24, adaptive batching off, pinned transfers off",
+            "profile_elapsed_seconds": 36.2070,
+            "external_wall_seconds": 37.13,
+            "decode_worker_seconds": 3.2139,
+            "torchcodec_files": 499,
+            "ffmpeg_fallback_files": 1,
+            "fallback_cause": "TorchCodec rejected one malformed WAV as invalid input; FFmpeg decoded it successfully.",
+            "retained_output_identity": "500/500 files byte-identical"
+          }
+        },
+        "decision": "Declare TorchCodec 0.14 as a core dependency and use it first in automatic mode because the retained batch decoder benchmark measured a 5.30x speedup over FFmpeg. The package does not bundle FFmpeg; TorchCodec uses system FFmpeg libraries, and an available ffmpeg executable remains the per-file recovery path."
+      },
+      "pyav_18_0_evaluation": {
+        "evaluated_at": "2026-07-13",
+        "scope": "Decoder-only comparison using fresh Python processes; backend imports completed before timing and every decoded array was consumed before release.",
+        "runs": {
+          "one_worker": 4,
+          "balanced_500_two_workers": 3
+        },
+        "runtime": {
+          "python": "3.12.12",
+          "pyav": "18.0.0",
+          "pyav_libraries": "libavcodec 62, libswresample 6",
+          "torch": "2.11.0+cu128",
+          "torchcodec": "0.14.0+cpu",
+          "ffmpeg_cli": "6.1.1"
+        },
+        "long_form_median_seconds_one_worker": {
+          "pyav": 2.519,
+          "torchcodec": 2.963,
+          "ffmpeg": 3.824
+        },
+        "balanced_500_median_seconds_one_worker": {
+          "pyav": 4.876,
+          "torchcodec": 2.891,
+          "ffmpeg": 19.916
+        },
+        "balanced_500_median_seconds_two_workers": {
+          "pyav": 4.842,
+          "torchcodec": 1.889,
+          "ffmpeg": 10.301
+        },
+        "batch_interpretation": "At the package default of two decode workers, TorchCodec was 2.56x faster than PyAV. PyAV was 2.13x faster than FFmpeg but regressed with four workers, while TorchCodec continued to scale.",
+        "sample_parity": {
+          "long_form_pyav_vs_ffmpeg": true,
+          "long_form_pyav_vs_torchcodec": true,
+          "balanced_500_pyav_vs_ffmpeg": "500/500 exact",
+          "balanced_500_pyav_vs_torchcodec": "499/499 exact for files accepted by TorchCodec"
+        },
+        "malformed_wav": "PyAV and FFmpeg recovered the same 36,849 samples from the one truncated IEEE-float WAV rejected by TorchCodec.",
+        "installation": {
+          "wheel_mib": 33.9,
+          "installed_mib": 101,
+          "torchcodec_installed_mib": 7
+        },
+        "decision": "Do not add PyAV as a core dependency or automatic backend. It is exact and robust, but TorchCodec is materially faster for concurrent batch decoding, PyAV adds 101 MiB and another decoder path, and the existing OS FFmpeg fallback already recovers the only rejected corpus file. PyAV remains a defensible future optional fallback only if recovery without an OS ffmpeg executable becomes a requirement."
+      },
+      "transformers_torch_extra": {
+        "accelerate_installed": false,
+        "artifact": "installed wheel",
+        "device": "cuda",
+        "dtype": "torch.bfloat16",
+        "fixture": "speech_04s_pcm16.wav",
+        "generated_tokens": 5,
+        "transcript_words": 1,
+        "decision": "Declare Torch directly and request only the Transformers sentencepiece extra. A real cached 2B-model CUDA load and generation completed without Accelerate, so the Transformers torch extra and its unused Accelerate dependency are omitted."
+      },
+      "lockfile": "The included universal uv.lock reproduces the standard PyPI source-development resolution and is checked by CI for consistency. CI and published installs use project dependency metadata with an explicit device-appropriate Torch backend. Device-specific PyTorch builds remain separate because uv's automatic Torch backend selection currently applies only to uv pip."
+    }
+  },
+  "production_hardening_validation": {
+    "evaluated_at": "2026-07-13",
+    "scope": [
+      "Durable ASR checkpoints, manifest-verified output generations, and per-stem advisory locks.",
+      "Bounded and cancellable audio decoding, media-offset handling, and source-change detection.",
+      "Persistent base-ASR OOM learning, isolated high-token retry caps, fatal-runtime circuit breaking, and per-file data-failure isolation.",
+      "Schema 7 generation telemetry, final-attempt token provenance, clean package installation, and Linux/Python 3.10-3.13 packaging."
+    ],
+    "static_and_install_validation": {
+      "python_runtime_modules": 42,
+      "largest_runtime_module_lines": 486,
+      "internal_import_cycles": 0,
+      "ruff_format": "passed",
+      "ruff_lint": "passed",
+      "compileall": "passed",
+      "pytest": "165 passed",
+      "focused_state_asr_cancellation_audio_tests": "53 passed",
+      "runtime_behavior_artifacts": 45,
+      "twine_check": "passed",
+      "standard_pip_wheel_install": "passed with pip check and a 1,600-sample automatic TorchCodec decode",
+      "combined_optional_extras_install": "passed imports, pip check, Librosa doctor, and word-alignment doctor"
+    },
+    "durability_and_failure_semantics": {
+      "source_identity": "device, inode, size, mtime_ns, and ctime_ns; a same-size rewrite with restored mtime invalidates state",
+      "checkpoint_validation": "fully materialized and validated before mutating an audio job",
+      "output_commit": "temporary files, content synchronization, rollback, atomic replacement, hashed manifest committed last, and directory synchronization",
+      "concurrency": "one private registry descriptor for same-user processes sharing a registry namespace, with deterministic per-stem advisory byte ranges and constant descriptor use across output directories",
+      "signals": "SIGINT exits 130 and SIGTERM exits 143 after cooperative cleanup; active FFmpeg and FFprobe children are killed and reaped",
+      "native_decoder_limit": "TorchCodec is an in-process native call and can observe cancellation only before and after the call",
+      "memory_contract": "TorchCodec and FFmpeg enforce the decoded float32 PCM cap during decoding; prepared-group memory is a scheduling target; explicit Librosa validates its cap after materialization",
+      "offset_media_fixture": "a one-second Matroska stream beginning at PTS 5.0 seconds probed as one second and decoded to exactly 16,000 sample-identical TorchCodec/FFmpeg samples"
+    },
+    "installed_wheel_long_form_lecture": {
+      "audio_seconds": 4160.6791875,
+      "configuration": "Arabic, BF16, packed Torch Silero with merge, segment timing, static ASR batch 24",
+      "external_wall_seconds": [
+        33.12,
+        33.08,
+        33.26
+      ],
+      "external_wall_median_seconds": 33.12,
+      "profile_elapsed_seconds": [
+        32.15272014500806,
+        32.05403997702524,
+        32.28885958198225
+      ],
+      "profile_elapsed_median_seconds": 32.15272014500806,
+      "profile_median_real_time_factor_x": 129.4,
+      "maximum_rss_kib": [
+        5793988,
+        5792968,
+        5793440
+      ],
+      "segments": 182,
+      "generation_batches": 8,
+      "processor_rows": 182,
+      "generated_tokens": 28277,
+      "peak_cuda_allocated_gib": 6.059401988983154,
+      "peak_cuda_reserved_gib": 6.103515625,
+      "txt_sha256": "11e07d260a45355f0b618dfbd0a3c6d81ae8b0074f1a767bdb153e2f82632dd6",
+      "srt_sha256": "f4735a25f5a55b19b8a8524de6f2310efde596f6cdee20bfa577c7caba0c8801",
+      "vtt_sha256": "fe9267234e755ac57230cbc909fe262e0e368deba34c0539cb201159cb588e7a",
+      "retained_output_identity": "TXT, SRT, and VTT matched in all three runs"
+    },
+    "installed_wheel_balanced_500": {
+      "files": 500,
+      "audio_seconds": 5035.7145,
+      "configuration": "Arabic, BF16, packed Torch Silero without merge, text only, static ASR batch 24",
+      "external_wall_seconds": [
+        39.54,
+        39.43,
+        39.13
+      ],
+      "external_wall_median_seconds": 39.43,
+      "profile_elapsed_seconds": [
+        38.53059638000559,
+        38.42599853599677,
+        38.08500895200996
+      ],
+      "profile_elapsed_median_seconds": 38.42599853599677,
+      "profile_median_real_time_factor_x": 131.05,
+      "processor_rows": 729,
+      "generation_batches": 33,
+      "generated_tokens": 21587,
+      "torchcodec_files": 499,
+      "ffmpeg_recovery_files": 1,
+      "checkpoints_written_per_run": 500,
+      "median_checkpoint_seconds": 0.6790879009640776,
+      "median_progressive_output_seconds": 1.0438665319234133,
+      "retained_transcript_matches": "500/500 in each of three runs"
+    },
+    "resume_validation": {
+      "verified_skip_500_external_wall_seconds": 1.39,
+      "render_only_long_form_external_wall_seconds": 3.13,
+      "render_only_long_form_profile_elapsed_seconds": 2.55119928001659,
+      "render_only_checkpoint_resumed_files": 1,
+      "render_only_model_load_decode_vad_generation_seconds": 0.0
+    },
+    "installed_wheel_word_alignment_smoke": {
+      "files": 5,
+      "external_wall_seconds": 14.21,
+      "profile_elapsed_seconds": 13.192548661027104,
+      "failed_files": 0,
+      "fallback_alignment_segments": 0,
+      "retained_transcript_matches": "5/5"
+    },
+    "interpretation": "Production hardening preserved every retained long-form and batch transcript while adding crash recovery, verified skip, bounded automatic decoding, failure isolation, and release-grade package validation. The repeated long-form and 500-file wall times remain within the established run variance."
+  },
+  "cleanup_validation": {
+    "evaluated_at": "2026-07-13",
+    "goal": "Remove dead code, duplicate logic, unreachable generality, and unnecessary internal surfaces without adding features or changing supported output behavior.",
+    "source_structure": {
+      "before_python_runtime_modules": 42,
+      "after_python_runtime_modules": 41,
+      "before_runtime_lines": 9573,
+      "after_runtime_lines": 8971,
+      "removed_runtime_lines": 602,
+      "runtime_line_reduction_percent": 6.29,
+      "before_largest_runtime_module_lines": 486,
+      "after_largest_runtime_module_lines": 468,
+      "runtime_behavior_artifacts": 44,
+      "internal_import_cycles": 0,
+      "high_confidence_vulture_findings": 0
+    },
+    "principal_simplifications": [
+      "Removed the pure pipeline compatibility facade, redundant non-word output traversal, dead OOM counter, unused output-lock helper, unused publication options, and trivial caches.",
+      "Consolidated duplicate state serialization, output-stem validation, release-version parsing, file hashing, prepared-job partitioning, and external-process termination logic.",
+      "Collapsed one-use ASR orchestration wrappers and simplified retained-audio filtering while preserving model-load/preparation and CPU/GPU overlap.",
+      "Consolidated decoder fallback handling into one path and removed production dependency-injection parameters that existed only for tests.",
+      "Reduced ASR text mapping to the processor's enforced one-row-per-segment contract; the pinned processor was verified at 29, 30, 31, 34.9, and 35 seconds.",
+      "Removed unused forced-alignment confidence processing and reduced retained alignment normalization to the supported Arabic/English, romanized, word-level path.",
+      "Removed unsupported aligner language/split branches, duplicate doctor mode behavior, the doctor entry-point wrapper, and internal __all__ inventories that did not define public APIs; the complete cleanup removed 602 runtime lines.",
+      "Kept durability, bounded-memory scheduling, OOM isolation, transactional publication, per-stem locking, cancellation, and checkpoint semantics intact because their complexity protects tested production invariants."
+    ],
+    "static_and_install_validation": {
+      "ruff_format": "passed",
+      "ruff_lint": "passed",
+      "compileall": "passed",
+      "pytest": "165 passed",
+      "twine_check": "passed",
+      "standard_pip_core_install": "passed with pip check, console and module help, segment doctor, and a 1,600-sample automatic TorchCodec decode",
+      "standard_pip_all_extras_install": "passed imports, pip check, Librosa doctor, and word-alignment doctor",
+      "public_pypi_torch_observation": "The default PyPI Torch 2.11.0 wheel selected CUDA 13.0 and could not initialize this machine's older NVIDIA driver; clean-install CPU validation passed, while GPU benchmarks used the documented device-specific Torch 2.11.0+cu128 environment."
+    },
+    "installed_wheel_long_form_lecture": {
+      "audio_seconds": 4160.6791875,
+      "configuration": "Arabic, BF16, packed Torch Silero with merge, segment timing, static ASR batch 24",
+      "external_wall_seconds": [
+        32.27,
+        32.27,
+        32.2
+      ],
+      "external_wall_median_seconds": 32.27,
+      "profile_elapsed_seconds": [
+        31.334436025994364,
+        31.33982966997428,
+        31.26661496097222
+      ],
+      "profile_elapsed_median_seconds": 31.334436025994364,
+      "profile_median_real_time_factor_x": 132.7829607033103,
+      "maximum_rss_kib": [
+        5795584,
+        5793252,
+        5794272
+      ],
+      "segments": 182,
+      "generation_batches": 8,
+      "processor_rows": 182,
+      "generated_tokens": 28277,
+      "peak_cuda_allocated_gib": 6.059401988983154,
+      "peak_cuda_reserved_gib": 6.103515625,
+      "txt_sha256": "11e07d260a45355f0b618dfbd0a3c6d81ae8b0074f1a767bdb153e2f82632dd6",
+      "srt_sha256": "f4735a25f5a55b19b8a8524de6f2310efde596f6cdee20bfa577c7caba0c8801",
+      "vtt_sha256": "fe9267234e755ac57230cbc909fe262e0e368deba34c0539cb201159cb588e7a",
+      "retained_output_identity": "TXT, SRT, and VTT matched in all three runs"
+    },
+    "installed_wheel_balanced_500": {
+      "files": 500,
+      "audio_seconds": 5035.7145,
+      "configuration": "Arabic, BF16, packed Torch Silero without merge, text only, static ASR batch 24",
+      "external_wall_seconds": [
+        39.27,
+        39.37,
+        38.89
+      ],
+      "external_wall_median_seconds": 39.27,
+      "profile_elapsed_seconds": [
+        38.28812012600247,
+        38.37094180402346,
+        37.90853838203475
+      ],
+      "profile_elapsed_median_seconds": 38.28812012600247,
+      "profile_median_real_time_factor_x": 131.52159164325528,
+      "processor_rows": 729,
+      "generation_batches": 33,
+      "generated_tokens": 21587,
+      "torchcodec_files": 499,
+      "ffmpeg_recovery_files": 1,
+      "median_checkpoint_seconds": 0.6769746029749513,
+      "median_progressive_output_seconds": 1.0351358680636622,
+      "retained_transcript_matches": "500/500 in each of three runs"
+    },
+    "resume_validation": {
+      "verified_skip_500_external_wall_seconds": 1.35,
+      "render_only_long_form_external_wall_seconds": 3.01,
+      "render_only_long_form_profile_elapsed_seconds": 2.4587256999802776,
+      "render_only_checkpoint_resumed_files": 1,
+      "render_only_model_load_decode_vad_generation_seconds": 0.0,
+      "render_only_txt_sha256": "11e07d260a45355f0b618dfbd0a3c6d81ae8b0074f1a767bdb153e2f82632dd6"
+    },
+    "installed_wheel_word_alignment_smoke": {
+      "files": 5,
+      "external_wall_seconds": 14.11,
+      "profile_elapsed_seconds": 13.152823286014609,
+      "failed_files": 0,
+      "fallback_alignment_segments": 0,
+      "retained_transcript_segment_word_cue_matches": "5/5 exact"
+    },
+    "interpretation": "The cleanup reduced runtime source by 6.29% while preserving every retained long-form, batch, and word-timestamp output. The repeated long-form median improved from 33.12 to 32.27 seconds and the 500-file median from 39.43 to 39.27 seconds; these small differences are within normal run variance, so the supported conclusion is no performance regression."
+  },
+  "release_cli_validation": {
+    "evaluated_at": "2026-07-13",
+    "report": "reports/0.1.0-release-validation.md",
+    "result": "No confirmed CLI defect remains open on the validated Linux offline batch-inference surface.",
+    "dependency_changes": {
+      "transformers": {
+        "before": "5.13.0",
+        "after": "5.13.1",
+        "cohere_source_identity": "The Cohere ASR model, processor, feature extractor, and configuration sources are byte-identical between the two releases.",
+        "runtime_validation": "Processor tensors, focused BF16 CUDA generation, the retained long-form outputs, and all 500 retained batch transcripts remained identical."
+      },
+      "librosa": {
+        "version": "0.11.0 or newer",
+        "status": "core dependency",
+        "reason": "CohereAsrFeatureExtractor imports Librosa to construct mel filters even when Librosa is not selected as the audio decoder.",
+        "decoder_policy": "The Librosa decoder remains explicit-only; automatic decoding still selects TorchCodec and uses an available FFmpeg executable only for per-file recovery."
+      },
+      "uv_lock": {
+        "status": "included and internally consistent",
+        "resolved_packages": 101,
+        "check": "uv lock --check passed",
+        "scope": "Standard PyPI source-development resolution with CI consistency checks; accelerator-specific PyTorch wheel selection remains explicit."
+      }
+    },
+    "automated": {
+      "main_long_option_forms": 50,
+      "doctor_long_option_forms": 4,
+      "short_help_aliases": 2,
+      "cli_parser_and_semantic_tests": 147,
+      "filesystem_planning_tests": 28,
+      "preflight_and_device_tests": 18,
+      "python_3_10": "359 passed at the CLI checkpoint",
+      "python_3_11": "359 passed at the CLI checkpoint",
+      "python_3_12": "359 passed at the CLI checkpoint",
+      "python_3_13": "359 passed at the CLI checkpoint",
+      "skips_or_expected_failures": 0,
+      "ruff_format": "passed",
+      "ruff_lint": "passed",
+      "compileall_python_3_10_to_3_13": "passed",
+      "wheel_and_sdist_build": "passed",
+      "twine_metadata": "passed",
+      "clean_pip_core_and_all_extras": "passed with pip check"
+    },
+    "real_cli_matrix": {
+      "successful_cases": 12,
+      "expected_error_cases": 1,
+      "covered_audio_backends": [
+        "auto",
+        "torchcodec",
+        "ffmpeg",
+        "librosa"
+      ],
+      "covered_vad_modes": [
+        "silero packed Torch",
+        "silero ONNX",
+        "silero TorchScript",
+        "auditok",
+        "none"
+      ],
+      "covered_alignment_modes": [
+        "word",
+        "segment",
+        "none",
+        "text-only alias"
+      ],
+      "covered_languages": [
+        "ar",
+        "en"
+      ],
+      "covered_existing_policies": [
+        "error",
+        "overwrite",
+        "skip"
+      ],
+      "covered_formats": [
+        "txt",
+        "srt",
+        "vtt",
+        "json"
+      ]
+    },
+    "retained_workloads": {
+      "long_form_lecture": {
+        "audio_seconds": 4160.6791875,
+        "external_wall_seconds": 32.25,
+        "segments": 182,
+        "generation_batches": 8,
+        "generated_tokens": 28277,
+        "output_identity": "TXT, SRT, and VTT retained hashes matched."
+      },
+      "balanced_500": {
+        "files": 500,
+        "audio_seconds": 5035.7145,
+        "external_wall_seconds": 39.14,
+        "processor_rows": 729,
+        "generation_batches": 33,
+        "generated_tokens": 21587,
+        "output_identity": "500/500 transcripts matched."
+      }
+    },
+    "failure_and_edge_validation": [
+      "Nested and nonrecursive discovery, supported suffixes, canonical deduplication, stable ordering, unusual names, and empty or invalid inputs.",
+      "Input, output, profile, state, same-stem, cross-root, symlink, directory, and FIFO collision rejection.",
+      "Per-file corrupt-audio isolation, silence publication, decoded-memory enforcement, verified skip, render-only resume, and token-limit retry or warning.",
+      "Real SIGINT status 130 and SIGTERM status 143 with cleanup and no temporary or backup files."
+    ],
+    "not_hardware_certified": [
+      "Apple MPS",
+      "Windows",
+      "AMD ROCm",
+      "multi-GPU scheduling",
+      "real CUDA without BF16",
+      "full-model CPU throughput",
+      "CUDA FP32 ASR on 12 GB VRAM",
+      "destructive disk and driver fault injection",
+      "ONNX CUDA VAD"
+    ]
+  },
+  "domain_package_refactor_validation": {
+    "evaluated_at": "2026-07-14",
+    "scope": "Move the existing implementation into shallow ASR, audio, output, pipeline, and state packages without changing the public CLI or inference behavior.",
+    "layout": {
+      "domain_packages": [
+        "alignment",
+        "asr",
+        "audio",
+        "output",
+        "pipeline",
+        "state",
+        "vad"
+      ],
+      "root_modules": "Entry points and cross-cutting configuration, cancellation, device, input, model, preflight, profile, and doctor concerns remain at package root.",
+      "compatibility_aliases": "None for removed internal paths. At the domain-refactor checkpoint the documented public surface was the CLI and package version; final 0.1.0 also provides a typed root Python API."
+    },
+    "automated": {
+      "tests": "359 passed on Python 3.12.12 at the domain-refactor checkpoint",
+      "ruff_format": "passed for 61 Python files",
+      "ruff_lint": "passed",
+      "compileall": "passed",
+      "uv_lock_check": "passed with 101 resolved packages",
+      "wheel_and_sdist_build": "passed",
+      "twine_metadata": "passed",
+      "wheel_entries": 66,
+      "nested_modules_and_packaged_assets": "verified",
+      "legacy_flat_modules_absent": "verified",
+      "installed_console_and_module_entry_points": "passed",
+      "cli_help_before_after": "byte-identical for both source module launchers",
+      "moved_output_function_bodies": "11/11 AST-identical",
+      "implementation_fingerprints": "All tracked ASR and render artifacts exist and produce nonempty installed-wheel fingerprints."
+    },
+    "installed_wheel_long_form_lecture": {
+      "audio_seconds": 4160.6791875,
+      "external_wall_seconds": 32.33,
+      "profile_elapsed_seconds": 31.41500645398628,
+      "external_rtfx": 128.69406704299413,
+      "profile_rtfx": 132.4424107183988,
+      "segments": 182,
+      "generation_batches": 8,
+      "generated_tokens": 28277,
+      "peak_cuda_allocated_gib": 6.059401988983154,
+      "peak_cuda_reserved_gib": 6.103515625,
+      "txt_sha256": "11e07d260a45355f0b618dfbd0a3c6d81ae8b0074f1a767bdb153e2f82632dd6",
+      "srt_sha256": "f4735a25f5a55b19b8a8524de6f2310efde596f6cdee20bfa577c7caba0c8801",
+      "vtt_sha256": "fe9267234e755ac57230cbc909fe262e0e368deba34c0539cb201159cb588e7a",
+      "output_identity": "TXT, SRT, and VTT matched the retained release hashes."
+    },
+    "installed_wheel_balanced_500": {
+      "files": 500,
+      "audio_seconds": 5035.7145,
+      "external_wall_seconds": 38.71,
+      "profile_elapsed_seconds": 37.77742106403457,
+      "external_rtfx": 130.0882071816068,
+      "profile_rtfx": 133.29958367100335,
+      "processor_rows": 729,
+      "generation_batches": 33,
+      "generated_tokens": 21587,
+      "successful_files": 500,
+      "failed_files": 0,
+      "output_identity": "500/500 TXT files matched the retained release outputs."
+    },
+    "interpretation": "The installed nested wheel preserved every retained transcript and subtitle artifact. Both smoke timings fall within the established release-run distribution, so no performance regression was observed. These two observations confirm the refactor; the repeated medians remain the performance baselines."
+  },
+  "python_api_validation": {
+    "evaluated_at": "2026-07-14",
+    "scope": "Typed one-shot and reusable Python APIs over the same input discovery, inference, alignment, result, and optional publication runtime used by the CLI.",
+    "public_surface": {
+      "one_shot": "cohere_transcribe.transcribe(path_or_paths, options=TranscriptionOptions(...), progress=..., raise_on_error=...)",
+      "reusable": "cohere_transcribe.Transcriber(TranscriptionOptions(...), progress=...).transcribe(path_or_paths, raise_on_error=...)",
+      "inputs": "One str or Path file/directory, or an ordered list/tuple of str and Path files/directories.",
+      "default_side_effects": "None. Results are returned in memory; PublicationOptions enables transactional files, checkpoints, manifests, locks, verified skips, and profiles.",
+      "option_parity": "Every CLI transcription option has a mechanically checked API equivalent or PublicationOptions field."
+    },
+    "automated": {
+      "tests": "477 passed plus 6 subtests on Python 3.10.20, 3.11.15, 3.12.12, and 3.13.14 after the final release gate",
+      "focused_coverage": "Input order and discovery, option parity, in-memory isolation, publication, partial failure, callbacks, lazy imports, typed errors, model reuse and ownership, word-mode eviction, process serialization, reentrancy, close races, timing, provenance, and result immutability.",
+      "ruff_format": "passed for 86 Python files",
+      "ruff_lint": "passed",
+      "uv_lock_check": "passed with 105 resolved packages",
+      "python_3_10_to_3_13_root_imports": "passed without importing Torch, Transformers, NumPy, Librosa, or TorchCodec",
+      "strict_typed_consumer": "passed against the installed wheel",
+      "wheel_and_sdist_build": "passed",
+      "twine_metadata": "passed",
+      "installed_wheel_smoke": "Root API exports, py.typed, typed invalid-input handling, CLI help, and doctor help passed."
+    },
+    "installed_wheel_api_smoke": {
+      "calls": "One string path followed by one ordered two-item Path/string sequence through a reusable Transcriber.",
+      "cold_single_seconds": 8.496,
+      "warm_two_file_seconds": 0.382,
+      "matching_retained_transcripts": "3/3",
+      "input_order_preserved": true,
+      "published_outputs": 0
+    },
+    "installed_wheel_long_form": {
+      "audio_seconds": 4160.6791875,
+      "external_wall_seconds": 32.53,
+      "profile_elapsed_seconds": 31.540258585009724,
+      "external_real_time_factor_x": 127.90283392253303,
+      "profile_real_time_factor_x": 131.91645770074516,
+      "max_rss_gib": 5.525882720947266,
+      "segments_and_processor_rows": 182,
+      "generation_batches": 8,
+      "generated_tokens": 28277,
+      "peak_cuda_allocated_gib": 6.059401988983154,
+      "peak_cuda_reserved_gib": 6.103515625,
+      "decode_backends": {
+        "torchcodec": 1
+      },
+      "txt_sha256": "11e07d260a45355f0b618dfbd0a3c6d81ae8b0074f1a767bdb153e2f82632dd6",
+      "srt_sha256": "f4735a25f5a55b19b8a8524de6f2310efde596f6cdee20bfa577c7caba0c8801",
+      "vtt_sha256": "fe9267234e755ac57230cbc909fe262e0e368deba34c0539cb201159cb588e7a",
+      "output_identity": "TXT, SRT, and VTT were byte-identical to the retained pre-API outputs."
+    },
+    "installed_wheel_balanced_500": {
+      "files": 500,
+      "audio_seconds": 5035.7145,
+      "external_wall_seconds": 38.78,
+      "profile_elapsed_seconds": 37.71720178797841,
+      "external_real_time_factor_x": 129.85339092315627,
+      "profile_real_time_factor_x": 133.51240975689325,
+      "max_rss_gib": 5.019397735595703,
+      "processor_rows": 729,
+      "generation_batches": 33,
+      "generated_tokens": 21587,
+      "peak_cuda_allocated_gib": 6.053555011749268,
+      "peak_cuda_reserved_gib": 6.142578125,
+      "decode_backends": {
+        "torchcodec": 499,
+        "ffmpeg_recovery": 1
+      },
+      "successful_files": 500,
+      "failed_files": 0,
+      "output_identity": "500/500 TXT files were byte-identical to the retained pre-API outputs."
+    },
+    "interpretation": "The final shared CLI/API runtime preserved every retained output and remained within the established installed-wheel timing distribution. These two fresh observations confirm no API-related inference or throughput regression; repeated medians remain the release performance baselines."
+  },
+  "five_reviewer_release_audit": {
+    "evaluated_at": "2026-07-14",
+    "scope": "Independent API/CLI, inference/runtime, distribution, durability/filesystem, and documentation/maintainability reviews followed by integrated source, artifact, and real-workload validation.",
+    "confirmed_fixes": [
+      "Reject same-thread and worker-progress-callback reentrant transcribe or close operations before acquiring session gates.",
+      "Translate invalid input, output-directory, and profile paths into concise typed errors, normalize symlink loops across Python 3.10-3.13, and reject nested output symlinks that resolve outside the canonical output root.",
+      "Bind audio-memory grouping and preparation-pipeline settings into ASR checkpoint contracts under state contract schema 2.",
+      "Share allocator-failure detection across ASR and alignment, including host batch construction and backend-reported allocation errors.",
+      "Check cancellation between bounded packed-Silero groups and during long validation and timestamp postprocessing loops.",
+      "Group the dependency-light public API under cohere_transcribe/api and split API tests by contract, execution, lifecycle, progress, resilience, results, runtime integration, and validation while preserving all 90 collected API cases.",
+      "Organize CI into focused quality and Python-version test jobs, remove the unused distribution job, and separate artifact builds from minimal Trusted Publishing jobs.",
+      "Clarify that audio-memory-gb is a hard per-file PCM limit and a prepared-group scheduling target, not a process-RSS cap.",
+      "Replace per-output-directory lock descriptors with one private same-user registry while retaining fail-fast pre-model reservation and independent per-stem byte ranges."
+    ],
+    "automated": {
+      "tests": "477 passed plus 6 subtests on Python 3.10.20, 3.11.15, 3.12.12, and 3.13.14",
+      "third_party_warnings": "3 Audioread compatibility-import deprecations",
+      "ruff_format": "passed for 86 Python files",
+      "ruff_lint": "passed",
+      "strict_public_api_mypy": "passed against source and the independently installed wheel",
+      "uv_lock_check": "passed with 105 resolved packages",
+      "compileall": "passed",
+      "workflow_yaml": "all three workflows passed actionlint 1.7.12",
+      "workflow_structure": "CI owns quality and tests; release owns build and PyPI publication; TestPyPI owns registry delivery verification",
+      "wheel_and_sdist_build": "passed",
+      "twine_metadata": "passed",
+      "wheel_contents": "passed",
+      "pyproject_validation": "passed"
+    },
+    "rebuilt_wheel_long_form": {
+      "audio_seconds": 4160.6791875,
+      "external_wall_seconds": 32.42,
+      "profile_elapsed_seconds": 31.523241622024216,
+      "profile_real_time_factor_x": 131.987669205729,
+      "segments_and_processor_rows": 182,
+      "generation_batches": 8,
+      "generated_tokens": 28277,
+      "output_identity": "TXT, SRT, and VTT hashes matched the retained release artifacts."
+    },
+    "rebuilt_wheel_balanced_500": {
+      "files": 500,
+      "audio_seconds": 5035.7145,
+      "external_wall_seconds": 38.52,
+      "profile_elapsed_seconds": 37.61860520398477,
+      "profile_real_time_factor_x": 133.86233946458464,
+      "processor_rows": 729,
+      "generation_batches": 33,
+      "generated_tokens": 21587,
+      "successful_files": 500,
+      "failed_files": 0,
+      "output_identity": "500/500 TXT files matched the retained production-review outputs."
+    },
+    "release_process_prerequisites": [
+      "Commit and review the exact candidate tree, push it, and rerun CI from that commit before tagging.",
+      "Configure the pypi and testpypi GitHub environments and matching Trusted Publishers before invoking the release workflows.",
+      "Choose and document project and bundled-source licensing terms before presenting the package as generally reusable open source."
+    ]
+  },
+  "final_release_gate": {
+    "evaluated_at": "2026-07-14",
+    "scope": "Cross-version path behavior, bounded publication-lock resources, complete source tests, and fresh distribution validation after the final release review.",
+    "python_matrix": {
+      "3.10.20": "477 passed plus 6 subtests",
+      "3.11.15": "477 passed plus 6 subtests",
+      "3.12.12": "477 passed plus 6 subtests",
+      "3.13.14": "477 passed plus 6 subtests"
+    },
+    "symlink_resolution": "Strict and allow-missing input, output-directory, profile, and nested-parent loops report a stable Symlink loop error across Python 3.10-3.13; genuinely missing non-input tails remain allowed.",
+    "lock_registry": {
+      "location_linux": "/tmp/cohere-transcribe-<uid>/outputs.lock",
+      "scope": "Processes sharing the same OS user and registry namespace",
+      "nested_low_limit": "200 files in 200 nested output directories planned successfully with RLIMIT_NOFILE=64",
+      "range_stress": "1,500 simultaneous stems in 1,500 directories used one shared registry descriptor",
+      "installed_wheel_stress": "1,200 simultaneous stems used one registry descriptor",
+      "safety": "Same-stem contention, independent ranges, partial-acquisition rollback, same-process duplication, private directory/file permissions, symlink rejection, release, and reacquisition passed"
+    },
+    "quality": {
+      "ruff_format": "passed",
+      "ruff_lint": "passed",
+      "strict_mypy": "passed",
+      "uv_lock_check": "passed with 108 resolved packages; locked all-extras resolution passed for Python 3.10-3.13, with ONNX Runtime 1.23.2 selected on Python 3.10 and 1.27.0 on newer supported versions",
+      "compileall": "passed",
+      "wheel_and_sdist_build": "passed",
+      "twine_strict": "passed",
+      "installed_wheel_smoke": "passed"
+    },
+    "inference_impact": "No ASR, VAD, alignment, batching, decoding, or rendering implementation changed. Existing retained accuracy and performance evidence remains applicable."
+  },
+  "notes": "Model weights are downloaded from Hugging Face on first use and are not included in the package. Segment timestamps are the default; TorchAudio and Uroman are installed only through the word extra. Word-alignment transcript identity was validated against frozen ASR output, so ASR WER is unchanged by the alignment-runtime migration. The 0.1.0 package organizes the validated implementation into shallow domain packages without changing inference logic. External process wall time includes package startup. Final profile schema 8 reports runtime imports and process-serialization wait separately from input validation and distinguishes all versus inferred segment durations; retained historical profiles in this report used schema 7. Packed Torch and sequence ONNX produced identical retained VAD timestamps and downstream transcripts; most VAD compute savings overlap GPU ASR in large folder runs. Exact runtime pins are limited to implementation-sensitive dependencies: Transformers private Cohere internals, the core Torch runtime, the optional Torch/TorchAudio ABI pair, Silero private weights, TorchCodec decoding behavior, and optional Uroman normalization behavior."
+}

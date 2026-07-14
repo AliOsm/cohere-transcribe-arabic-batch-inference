@@ -1,0 +1,97 @@
+[build-system]
+requires = ["uv_build>=0.11.28,<0.12"]
+build-backend = "uv_build"
+
+[project]
+name = "cohere-transcribe-arabic"
+version = "0.1.0"
+description = "Unofficial high-throughput batch inference for Cohere Arabic/English ASR"
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
+authors = [{ name = "Ali Osm" }]
+keywords = ["arabic", "asr", "batch-inference", "cohere", "speech-recognition"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Intended Audience :: Developers",
+  "Intended Audience :: Science/Research",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Multimedia :: Sound/Audio :: Speech",
+  "Typing :: Typed",
+]
+dependencies = [
+  "huggingface-hub",
+  "librosa>=0.11.0",
+  "numpy",
+  "packaging",
+  "torch==2.11.0",
+  "torchcodec==0.14.0",
+  "tqdm",
+  "transformers[sentencepiece]==5.13.1",
+]
+
+[project.optional-dependencies]
+auditok = ["auditok>=0.4.2,<0.5"]
+onnx = [
+  "onnxruntime>=1.16.1,<1.24; python_version < '3.11'",
+  "onnxruntime>=1.16.1; python_version >= '3.11'",
+]
+word = ["torchaudio==2.11.0", "uroman==1.3.1.1"]
+
+[project.urls]
+Documentation = "https://github.com/AliOsm/cohere-transcribe-arabic-batch-inference#readme"
+Issues = "https://github.com/AliOsm/cohere-transcribe-arabic-batch-inference/issues"
+Repository = "https://github.com/AliOsm/cohere-transcribe-arabic-batch-inference"
+
+[project.scripts]
+cohere-transcribe = "cohere_transcribe.cli:cli"
+cohere-transcribe-doctor = "cohere_transcribe.doctor:main"
+
+[dependency-groups]
+dev = [
+  "mypy>=1.19,<2",
+  "pytest>=8.4",
+  "ruff==0.15.21",
+  "silero-vad==6.2.1",
+  "tomli>=2; python_version < '3.11'",
+]
+
+[tool.uv.build-backend]
+module-name = "cohere_transcribe"
+source-include = [
+  "CHANGELOG.md",
+  "docs/**",
+  "reports/**",
+  "scripts/**",
+  "tests/**",
+]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
+filterwarnings = [
+  "ignore:`torch\\.jit\\.load` is deprecated.*:DeprecationWarning",
+]
+
+[tool.ruff]
+line-length = 88
+target-version = "py310"
+extend-exclude = [
+  "src/cohere_transcribe/alignment/alignment_utils.py",
+]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = [
+  "B009",   # Explicit getattr documents optional third-party attributes.
+  "E501",
+  "RUF046", # Retain casts at external-library and NumPy type boundaries.
+]
+
+[tool.ruff.format]
+docstring-code-format = true
