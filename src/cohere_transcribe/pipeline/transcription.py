@@ -92,6 +92,11 @@ def finalize_completed_asr_jobs(
         try:
             write_asr_checkpoint(job)
             stats.asr_checkpoint_written_files += 1
+        except OSError as exc:
+            info(
+                f"[warn] {job.path}: ASR checkpoint could not be stored durably "
+                f"({type(exc).__name__}: {exc}); continuing with output publication"
+            )
         except Exception as exc:
             job.error = f"ASR checkpoint failed: {type(exc).__name__}: {exc}"
             info(f"[error] {job.path}: {job.error}")

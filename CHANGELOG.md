@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3 - 2026-07-15
+
+- Continue publishing completed transcripts when resumable ASR checkpoint persistence fails with an I/O error, while reporting the checkpoint warning and retaining fatal handling for invalid checkpoint data.
+
 ## 0.1.2 - 2026-07-15
 
 - Use one directory-sync policy for outputs, profiles, and resumable state, preserving best-effort behavior on unsupported filesystems while propagating genuine I/O failures.

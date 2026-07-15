@@ -473,6 +473,67 @@ def test_progressive_finalizer_publishes_and_retains_checkpoint(
         release_output_locks([job])
 
 
+def test_progressive_finalizer_publishes_after_checkpoint_sync_failure(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "clip.wav"
+    source.write_bytes(b"audio")
+    args = make_config(source, tmp_path / "out")
+    job = build_one(args)
+    stats = RunStats()
+    try:
+        populate_asr(job)
+        with (
+            mock.patch(
+                "cohere_transcribe.state.io.fsync_directories",
+                side_effect=OSError("simulated checkpoint directory I/O failure"),
+            ),
+            mock.patch("cohere_transcribe.pipeline.transcription.info") as report,
+        ):
+            finalize_completed_asr_jobs([job], args, stats)
+
+        assert job.error is None
+        assert job.published
+        assert (tmp_path / "out" / "clip.txt").read_text(encoding="utf-8") == (
+            "transcript\n"
+        )
+        assert job.state_path is not None and job.state_path.is_file()
+        assert stats.asr_checkpoint_written_files == 0
+        report.assert_any_call(
+            f"[warn] {job.path}: ASR checkpoint could not be stored durably "
+            "(OSError: simulated checkpoint directory I/O failure); "
+            "continuing with output publication"
+        )
+    finally:
+        release_output_locks([job])
+
+
+def test_progressive_finalizer_keeps_checkpoint_data_failures_fatal(
+    tmp_path: Path,
+) -> None:
+    source = tmp_path / "clip.wav"
+    source.write_bytes(b"audio")
+    args = make_config(source, tmp_path / "out")
+    job = build_one(args)
+    stats = RunStats()
+    try:
+        populate_asr(job)
+        with mock.patch(
+            "cohere_transcribe.pipeline.transcription.write_asr_checkpoint",
+            side_effect=ValueError("invalid checkpoint payload"),
+        ):
+            finalize_completed_asr_jobs([job], args, stats)
+
+        assert (
+            job.error == "ASR checkpoint failed: ValueError: invalid checkpoint payload"
+        )
+        assert not job.published
+        assert not (tmp_path / "out" / "clip.txt").exists()
+        assert stats.asr_checkpoint_written_files == 0
+    finally:
+        release_output_locks([job])
+
+
 def test_manifest_is_committed_last_and_failure_restores_generation(
     tmp_path: Path,
 ) -> None:
