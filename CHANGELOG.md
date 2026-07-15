@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.1.1 - Unreleased
+## 0.1.1 - 2026-07-15
 
 - Add custom-model selection with immutable Hub revisions and canonical local identities for native dense Cohere ASR checkpoints, saved bitsandbytes INT8/INT4 checkpoints through the `quantized` extra, and safely merged PEFT LoRA adapters through the `adapters` extra.
 - Load compatible model and adapter directories directly from canonical local paths without Hub resolution, revisions, artifact hashing, or another cache; accept path-like references in the Python API and retain canonical/null provenance in outputs and state contracts.
